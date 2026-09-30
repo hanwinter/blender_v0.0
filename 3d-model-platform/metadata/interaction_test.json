@@ -1,0 +1,12 @@
+{
+  "id": "interaction_test",
+  "version": "1.0.0",
+  "name": "交互测试模型",
+  "description": "用于验证多 Mesh 部件、深层节点和共享材质的交互。",
+  "model_url": null,
+  "parts": [
+    { "id": "part_a", "name": "部件 A", "description": "包含两个 Mesh；点击任意一个子 Mesh 都选中整个部件。" },
+    { "id": "part_b", "name": "部件 B", "description": "与其他部件使用相同的基础材质来源，高亮应保持独立。" },
+    { "id": "part_c", "name": "部件 C", "description": "Mesh 位于两层 Group 内，拾取仍映射到稳定业务部件 ID。" }
+  ]
+}

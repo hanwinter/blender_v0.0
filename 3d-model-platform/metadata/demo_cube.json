@@ -1,0 +1,15 @@
+{
+  "id": "demo_cube",
+  "version": "1.0.0",
+  "name": "测试立方体",
+  "description": "六面部件交互与三视图验证模型。",
+  "model_url": null,
+  "parts": [
+    { "id": "face_front", "name": "前面", "description": "立方体的前面，位于 +Z 方向，主视图正对该面。" },
+    { "id": "face_back", "name": "后面", "description": "立方体的后面，位于 -Z 方向，与前面相对。" },
+    { "id": "face_left", "name": "左面", "description": "立方体的左面，位于 -X 方向，与右面相对。" },
+    { "id": "face_right", "name": "右面", "description": "立方体的右面，位于 +X 方向，右视图正对该面。" },
+    { "id": "face_top", "name": "顶面", "description": "立方体的顶面，位于 +Y 方向，俯视图正对该面。" },
+    { "id": "face_bottom", "name": "底面", "description": "立方体的底面，位于 -Y 方向，与顶面相对。" }
+  ]
+}
