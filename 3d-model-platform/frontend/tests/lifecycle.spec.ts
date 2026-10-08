@@ -25,7 +25,7 @@ test('mount, unmount and prop replacement never accumulate animation loops', asy
   }
   await expect.poll(count).toBe(1)
   await page.getByRole('button', { name: '切换资源' }).click()
-  await expect(page.getByRole('alert')).toHaveText('当前版本暂不支持 GLB 资源。')
+  await expect(page.getByRole('alert')).toHaveText('模型资源地址为空。')
   await expect.poll(count).toBe(0)
   await page.getByRole('button', { name: '切换资源' }).click()
   await expect(page.getByRole('alert')).toHaveCount(0)

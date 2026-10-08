@@ -6,16 +6,18 @@ import ModelInfoPanel from './components/ModelInfoPanel.vue'
 import ViewerToolbar from './components/ViewerToolbar.vue'
 import ViewerDebugPanel from './components/ViewerDebugPanel.vue'
 import { api } from './api/client'
-import { config, modelOptions } from './config'
+import { humanParts } from './models/humanParts'
+import { config, modelOptions, getModelSource } from './config'
+import type { ModelOptionKey } from './config'
 import { asProjectError } from './errors'
 import type { Diagnostic } from './errors'
 import { parseMetadata, validatePartMetadata } from './metadata/validate'
-import type { ModelReady, ModelSource, PartSelection } from './models/types'
+import type { ModelReady, PartSelection } from './models/types'
 import type { ModelDetail, ModelInfo, ViewMode } from './types/model'
 
 const viewer = ref<InstanceType<typeof ModelViewer> | null>(null)
-const sourceType = ref<'demo' | 'interaction-test'>(config.defaultModel)
-const source = computed<ModelSource>(() => ({ type: sourceType.value }))
+const sourceType = ref<ModelOptionKey>(config.defaultModel)
+const source = computed(() => getModelSource(sourceType.value))
 const option = computed(() => modelOptions.find((item) => item.source === sourceType.value)!)
 const debug = ref(config.debug)
 const model = ref<ModelDetail | null>(null)
@@ -33,7 +35,10 @@ const consistencyIssues = computed(() => readyModel.value
 const issues = computed(() => [...metadataIssues.value, ...consistencyIssues.value, ...(viewerIssue.value ? [viewerIssue.value] : [])])
 const parts = computed<ModelInfo[]>(() => {
   const unique = new Map(readyModel.value?.parts.map((part) => [part.id, part]) ?? [])
-  return [...unique.values()].map((part) => {
+  const loaded = [...unique.values()]
+  if (source.value.type === 'glb') loaded.sort((a, b) =>
+    humanParts.findIndex((part) => part.id === a.id) - humanParts.findIndex((part) => part.id === b.id))
+  return loaded.map((part) => {
     const data = model.value?.parts.find((item) => item.id === part.id)
     return { id: part.id, name: data?.name.trim() || part.id, description: data?.description.trim() || '部件信息暂不可用。' }
   })
@@ -44,7 +49,7 @@ const fatalIssue = computed(() => issues.value.find((issue) =>
   ['NETWORK_ERROR', 'MODEL_NOT_FOUND', 'MODEL_LOAD_ERROR', 'METADATA_LOAD_ERROR'].includes(issue.code)))
 const status = computed(() => fatalIssue.value ? 'error' : fetching.value ? 'checking' : issues.value.length ? 'warning' : 'ready')
 const statusText = computed(() => fatalIssue.value?.message.replace(/。$/, '')
-  || (fetching.value ? '连接中' : issues.value.length ? '模型信息不完整' : '服务在线'))
+  || (fetching.value ? '连接中' : issues.value.length ? '模型信息不完整' : source.value.type === 'glb' ? '本地模型' : '服务在线'))
 
 watch(sourceType, async () => {
   request?.abort()
@@ -53,6 +58,12 @@ watch(sourceType, async () => {
   model.value = null
   metadataIssues.value = []
   fetching.value = true
+  if (source.value.type === 'glb') {
+    model.value = { id: option.value.id, name: option.value.label, description: '人体部位交互模型',
+      version: '1.0.0', model_url: source.value.url, part_count: humanParts.length, parts: humanParts }
+    fetching.value = false
+    return
+  }
   const requestedId = option.value.id
   try {
     const health = await api.health(signal)
@@ -103,7 +114,8 @@ onBeforeUnmount(() => request?.abort())
         <ViewerToolbar v-model:view-mode="viewMode" @reset="viewer?.resetView()" />
         <ModelViewer ref="viewer" :source="source" :view-mode="viewMode" :debug="debug"
           @select="selected = $event" @hover="hovered = $event" @ready="readyModel = $event" @error="viewerIssue = $event" />
-        <div class="viewer-status"><span class="viewer-status-dot" />{{ selected ? '已选中' : hovered ? '悬停中' : '就绪' }}<span class="object-total">{{ readyModel?.parts.length ?? 0 }} 个部件</span></div>
+        <p class="viewer-help">左键点击选择 · 左键拖动旋转（透视） · 右键拖动平移 · 滚轮缩放</p>
+        <div class="viewer-status"><span class="viewer-status-dot" />{{ selected ? '已选中' : hovered ? '悬停中' : '就绪' }}<span class="object-total">{{ (readyModel?.parts.length ?? 0) + ' 个部件' }}</span></div>
         <ViewerDebugPanel v-if="debug" :source="source" :model="readyModel" :hovered="hovered" :selected="selected" :issues="issues" />
       </section>
       <ModelInfoPanel :model="selectedInfo" :parts="parts" @select-part="viewer?.selectPart($event)" />

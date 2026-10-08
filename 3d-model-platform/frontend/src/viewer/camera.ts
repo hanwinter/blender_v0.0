@@ -28,7 +28,7 @@ export function createCameraRig(canvas: HTMLCanvasElement, model: Object3D, init
     const previousDistance = fitDistance
     fitDistance = distanceForAspect()
     if (controls && camera === perspective) {
-      perspective.position.sub(center).multiplyScalar(fitDistance / previousDistance).add(center)
+      perspective.position.sub(controls.target).multiplyScalar(fitDistance / previousDistance).add(controls.target)
     }
     const halfHeight = radius * 0.9 / Math.min(aspect, 1)
     orthographic.left = -halfHeight * aspect
@@ -60,7 +60,7 @@ export function createCameraRig(canvas: HTMLCanvasElement, model: Object3D, init
     controls.enableDamping = true
     controls.dampingFactor = 0.08
     controls.enableRotate = next === 'perspective'
-    controls.enablePan = false
+    controls.enablePan = true
     controls.minDistance = radius * 1.4
     controls.maxDistance = radius * 20
     controls.minZoom = 0.5

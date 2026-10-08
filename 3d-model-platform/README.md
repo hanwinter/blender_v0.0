@@ -1,11 +1,15 @@
 # Web 3D Model Platform
 
-当前 V0.2，使用 Cube 和独立交互测试模型稳定 Viewer 架构。暂不接入真实 Blender 或 GLB 资产。
+当前保留 Cube 和交互测试模型，并支持四个本地人体 GLB 展示模型。默认仍为 Cube。
 
 前端：Vue 3、TypeScript、Vite、Three.js、Lucide。后端：Python、FastAPI、SQLAlchemy、SQLite。
 无大型 UI 框架、Pinia、Docker 或数据库迁移框架。
 
 ## 安装与启动
+
+便捷启动：双击工作目录 `project_blender/start.bat`，自动打开前后端两个终端。
+也可在工作目录的 PowerShell 中执行 `./start.bat`。页面地址为 <http://127.0.0.1:5174>（默认配置）。
+在各服务窗口按 Ctrl+C 停止；请勿重复启动。首次安装依赖仍使用下方 setup 脚本。
 
 验证环境为 Node.js 22.4.1、Python 3.13.13、Windows PowerShell。
 在项目根目录执行一次：
@@ -47,6 +51,9 @@ npm run dev
 `app.run` 默认开启后端开发重载；`--no-reload` 可关闭。
 
 ## 配置
+
+当前本地 `.env` 使用前端端口 `15174`、后端端口 `18000`，以减少与其他项目冲突。
+本地页面：<http://127.0.0.1:15174>；API 文档：<http://127.0.0.1:18000/docs>。下方配置表为默认值。
 
 根 `.env.example` 是共享配置模板；实际根 `.env` 被 Git 忽略。
 
@@ -146,7 +153,9 @@ npm run dev
 
 ## 模型与交互
 
-模型下拉框可切换 Cube 与交互测试模型：
+模型下拉框可切换 Cube、交互测试模型，以及女性·写实、女性·风格化、男性·写实、男性·风格化：
+
+人体文件位于 `frontend/public/models/`，构建时复制到 dist。四个人体支持八个部位的点击、整块高亮和示例说明；无需后端记录即可加载，支持旋转、缩放、右键平移及视图切换。默认仍为 Cube。
 
 - Cube：六个独立面，验证基本拾取、悬停、选中与三视图。
 - 交互测试模型：三个部件、四个 Mesh，含一个双 Mesh 部件、深层 Group 和跨部件共享基础材质。
@@ -157,7 +166,7 @@ npm run dev
 - 元数据异常不阻止几何显示和拾取；UI 显示友好状态，Debug 显示具体原因。
 - 一条 RAF，正确清理 Controls、事件、ResizeObserver、克隆和原始材质、几何、纹理、Renderer。
 
-`ModelSource -> loadModel -> LoadedModel -> Runtime` 为固定边界。`glb` 类型仅预留，不实现加载。
+`ModelSource -> loadModel -> LoadedModel -> Runtime` 为固定边界。`glb` 类型通过 GLTFLoader 加载本地资源，支持请求取消及过期解析结果清理。
 不再使用空 modelUrl 隐式创建 Cube。
 
 详细接口和资源所有权见 [架构说明](docs/architecture.md)。
@@ -207,12 +216,4 @@ npx playwright test production.spec.ts
 
 ## 下一阶段
 
-本轮架构冻结，继续保留两种回归模型。待模型设计完成后：
-
-1. Blender 整理并导出 GLB，确认部件结构和稳定业务 ID 映射。
-2. 新增 GLB Loader 实现，返回既有 LoadedModel / ModelPart。
-3. 启用 modelLoader 的 glb 分支，App 显式提供来源。
-4. 按真实资源补充纹理、骨骼与动画资源释放，并执行既有回归测试。
-
-本轮未实现真实 GLB、人体、上传、CRUD、后台管理、权限、对象存储、动画、LOD、材质编辑、VR、WebGPU、Docker或三视图同时分屏。
-构建有约 595 kB JavaScript 文件的体积提示，主要为 Three.js；构建成功，当前未拆包。
+四个人体 GLB 当前为无服装版本，保留基础皮肤、棕色虹膜与黑色瞳孔，以及八部位交互。最新可编辑源文件为 `assets/human/source/*-unclothed-interactive.blend`，旧服装源文件与生成脚本归档在 `C:\AllFiles\MyFolderOMEN\blender\project_blender_archive\2026-10-08-history`，后续可适配成品服装。说明文字仍为示例。编辑与重新导出方法见 [人体交互说明](docs/human-interaction.md)。

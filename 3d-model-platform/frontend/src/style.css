@@ -106,3 +106,5 @@ dd { margin: 0; font-size: 13px; line-height: 1.9; color: #535e65; overflow-wrap
 @media (max-width: 420px) {
   .model-heading-tools .model-name { display: none; }
 }
+
+.viewer-help { margin: 8px 0; color: #66717d; font-size: 12px; line-height: 1.6; }

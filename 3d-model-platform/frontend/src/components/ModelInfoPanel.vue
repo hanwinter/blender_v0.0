@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Box, X } from '@lucide/vue'
 import type { ModelInfo } from '../types/model'
-defineProps<{ model: ModelInfo | null; parts: ModelInfo[] }>()
+defineProps<{ model: ModelInfo | null; parts: ModelInfo[]; displayOnly?: boolean }>()
 const emit = defineEmits<{ selectPart: [id: string | null] }>()
 </script>
 
@@ -35,7 +35,7 @@ const emit = defineEmits<{ selectPart: [id: string | null] }>()
       </template>
       <div v-else class="empty-selection">
         <div class="object-symbol"><Box :size="26" :stroke-width="1.5" /></div>
-        <p>当前未选择模型部件</p>
+        <p>{{ displayOnly ? '此人体模型仅供展示，暂无独立部件信息' : '当前未选择模型部件' }}</p>
       </div>
     </div>
   </aside>
